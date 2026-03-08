@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Фінанси">
+<meta name="theme-color" content="#0a0f0d">
+<title>Фінанси</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Unbounded:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0f0d;
+  --surface: #111a15;
+  --surface2: #162019;
+  --green: #00ff88;
+  --green-dim: #00ff8820;
+  --green-mid: #00cc6a;
+  --red: #ff4466;
+  --red-dim: #ff446620;
+  --yellow: #ffcc00;
+  --yellow-dim: #ffcc0020;
+  --blue: #4488ff;
+  --blue-dim: #4488ff20;
+  --text: #e8f5ee;
+  --text-dim: #5a7a66;
+  --border: #1a2a20;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+}
+
+/* LAYOUT */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  height: 100dvh;
+}
+
+.screen {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: calc(var(--safe-top) + 20px) 16px 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.screen.active { display: block; }
+
+/* NAV */
+.nav {
+  display: flex;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding-bottom: var(--safe-bottom);
+  flex-shrink: 0;
+}
+
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 0;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.nav-btn.active { color: var(--green); }
+.nav-btn svg { width: 22px; height: 22px; }
+
+/* TYPOGRAPHY */
+.page-title {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 22px;
+  font-weight: 900;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.section-label {
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  margin-top: 24px;
+}
+
+/* CARDS */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 10px;
+}
+
+.card-sm {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+
+/* DASHBOARD */
+.balance-hero {
+  background: linear-gradient(135deg, #0d2018 0%, var(--surface) 100%);
+  border: 1px solid var(--green);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.balance-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -30px; right: -30px;
+  width: 100px; height: 100px;
+  background: radial-gradient(circle, var(--green-dim) 0%, transparent 70%);
+}
+
+.balance-label {
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--green);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.balance-amount {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 38px;
+  font-weight: 900;
+  color: var(--green);
+  line-height: 1;
+}
+
+.balance-sub {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-top: 6px;
+}
+
+.accounts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.account-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.account-card .ac-label { font-size: 9px; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 6px; }
+.account-card .ac-amount { font-family: 'Unbounded', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); }
+.account-card .ac-currency { font-size: 9px; color: var(--text-dim); }
+
+.spending-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.spending-row:last-child { border-bottom: none; }
+
+.spending-cat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.spending-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.spending-name { font-size: 11px; color: var(--text); }
+.spending-desc { font-size: 9px; color: var(--text-dim); margin-top: 1px; }
+.spending-amount { font-family: 'Unbounded', sans-serif; font-size: 12px; font-weight: 700; }
+.spending-amount.neg { color: var(--red); }
+.spending-amount.pos { color: var(--green); }
+
+/* PROGRESS BAR */
+.prog-wrap { background: var(--border); border-radius: 4px; height: 4px; margin-top: 6px; overflow: hidden; }
+.prog-bar { height: 100%; border-radius: 4px; transition: width 1s cubic-bezier(0.34,1.56,0.64,1); }
+
+/* WISHLIST */
+.wish-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 10px;
+  transition: border-color 0.2s;
+}
+
+.wish-card.done { border-color: var(--green); }
+.wish-card.done .wish-name { color: var(--green); }
+
+.wish-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.wish-emoji { font-size: 24px; }
+.wish-name { font-family: 'Unbounded', sans-serif; font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.wish-price { font-size: 10px; color: var(--text-dim); }
+.wish-priority { font-size: 8px; letter-spacing: 2px; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; }
+.wish-priority.high { background: var(--red-dim); color: var(--red); }
+.wish-priority.med { background: var(--yellow-dim); color: var(--yellow); }
+.wish-priority.low { background: var(--blue-dim); color: var(--blue); }
+.wish-pct { font-size: 10px; color: var(--text-dim); text-align: right; margin-top: 4px; }
+.wish-status { font-size: 9px; color: var(--green); letter-spacing: 1px; margin-top: 4px; }
+
+/* BUDGET */
+.month-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.month-name {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.month-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: border-color 0.2s;
+}
+
+.month-btn:hover { border-color: var(--green); }
+
+.budget-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.bsum-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 10px;
+  text-align: center;
+}
+
+.bsum-label { font-size: 8px; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; }
+.bsum-amount { font-family: 'Unbounded', sans-serif; font-size: 13px; font-weight: 700; }
+
+.cat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.cat-item:last-child { border-bottom: none; }
+.cat-icon { font-size: 20px; width: 32px; text-align: center; flex-shrink: 0; }
+.cat-info { flex: 1; }
+.cat-name { font-size: 11px; margin-bottom: 4px; }
+.cat-amounts { display: flex; justify-content: space-between; font-size: 9px; color: var(--text-dim); margin-bottom: 4px; }
+.cat-spent { font-family: 'Unbounded', sans-serif; font-size: 12px; font-weight: 700; }
+
+/* REMINDERS */
+.reminder-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 8px;
+  transition: border-color 0.2s;
+}
+
+.reminder-card.urgent { border-color: var(--red); }
+.reminder-card.soon { border-color: var(--yellow); }
+.reminder-card.ok { border-color: var(--border); }
+.reminder-card.paid { opacity: 0.4; }
+
+.rem-date {
+  text-align: center;
+  min-width: 40px;
+  flex-shrink: 0;
+}
+
+.rem-day { font-family: 'Unbounded', sans-serif; font-size: 20px; font-weight: 900; line-height: 1; }
+.rem-month { font-size: 8px; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; }
+.rem-info { flex: 1; }
+.rem-name { font-size: 12px; margin-bottom: 2px; }
+.rem-desc { font-size: 9px; color: var(--text-dim); }
+.rem-amount { font-family: 'Unbounded', sans-serif; font-size: 14px; font-weight: 700; }
+.rem-amount.red { color: var(--red); }
+.rem-amount.yellow { color: var(--yellow); }
+.rem-amount.green { color: var(--green); }
+
+.rem-check {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--green);
+  font-size: 14px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.rem-check.checked { background: var(--green-dim); border-color: var(--green); }
+
+/* ADD TRANSACTION */
+.fab {
+  position: fixed;
+  bottom: calc(var(--safe-bottom) + 70px);
+  right: 20px;
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: var(--green);
+  border: none;
+  color: var(--bg);
+  font-size: 24px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 20px var(--green-dim);
+  z-index: 100;
+  transition: transform 0.2s;
+}
+
+.fab:active { transform: scale(0.92); }
+
+/* MODAL */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 200;
+  align-items: flex-end;
+  backdrop-filter: blur(4px);
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border-radius: 20px 20px 0 0;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  padding: 20px 20px calc(var(--safe-bottom) + 20px);
+  width: 100%;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.modal-handle {
+  width: 36px; height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+
+.modal-title {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.form-group { margin-bottom: 14px; }
+
+.form-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.form-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus { border-color: var(--green); }
+
+.type-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.type-btn {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text-dim);
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+
+.type-btn.active.expense { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+.type-btn.active.income { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  background: var(--green);
+  border: none;
+  border-radius: 12px;
+  color: var(--bg);
+  font-family: 'Unbounded', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: opacity 0.2s;
+}
+
+.btn-primary:active { opacity: 0.85; }
+
+/* CSV IMPORT */
+.import-area {
+  border: 2px dashed var(--border);
+  border-radius: 14px;
+  padding: 30px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  margin-bottom: 14px;
+}
+
+.import-area:hover { border-color: var(--green); }
+.import-area .import-icon { font-size: 32px; margin-bottom: 10px; }
+.import-area .import-text { font-size: 11px; color: var(--text-dim); line-height: 1.6; }
+.import-area .import-hint { font-size: 9px; color: var(--text-dim); margin-top: 6px; opacity: 0.6; }
+
+/* TOAST */
+.toast {
+  position: fixed;
+  top: calc(var(--safe-top) + 16px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-80px);
+  background: var(--green);
+  color: var(--bg);
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  z-index: 300;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  white-space: nowrap;
+}
+
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ANIMATIONS */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate { animation: fadeIn 0.4s ease both; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- DASHBOARD -->
+  <div class="screen active" id="screen-dashboard">
+    <div class="page-title">Привіт 👋<br><span style="color:var(--green)">Фінанси</span></div>
+
+    <div class="balance-hero">
+      <div class="balance-label">Загальний баланс</div>
+      <div class="balance-amount" id="total-balance">11 313 zł</div>
+      <div class="balance-sub" id="balance-date">Станом на сьогодні</div>
+    </div>
+
+    <div class="accounts-row">
+      <div class="account-card">
+        <div class="ac-label">PKO</div>
+        <div class="ac-amount" id="acc-pko">347</div>
+        <div class="ac-currency">zł</div>
+      </div>
+      <div class="account-card">
+        <div class="ac-label">Ощадний</div>
+        <div class="ac-amount" id="acc-save">3 395</div>
+        <div class="ac-currency">zł</div>
+      </div>
+      <div class="account-card">
+        <div class="ac-label">Готівка</div>
+        <div class="ac-amount" id="acc-cash">5 600</div>
+        <div class="ac-currency">zł cash</div>
+      </div>
+      <div class="account-card" style="border-color:var(--red)">
+        <div class="ac-label" style="color:var(--red)">Борг Mono</div>
+        <div class="ac-amount" style="color:var(--red)" id="acc-debt">-4 696</div>
+        <div class="ac-currency">грн</div>
+      </div>
+    </div>
+
+    <div class="section-label">Останні транзакції</div>
+    <div class="card" id="transactions-list">
+      <!-- filled by JS -->
+    </div>
+
+    <div style="height: 80px"></div>
+  </div>
+
+  <!-- WISHLIST -->
+  <div class="screen" id="screen-wishlist">
+    <div class="page-title">Wishlist 🎯</div>
+
+    <div id="wishlist-container">
+      <!-- filled by JS -->
+    </div>
+
+    <div style="height: 80px"></div>
+  </div>
+
+  <!-- BUDGET -->
+  <div class="screen" id="screen-budget">
+    <div class="month-selector">
+      <button class="month-btn" onclick="changeMonth(-1)">‹</button>
+      <div class="month-name" id="month-display">БЕРЕЗЕНЬ 2026</div>
+      <button class="month-btn" onclick="changeMonth(1)">›</button>
+    </div>
+
+    <div class="budget-summary">
+      <div class="bsum-card">
+        <div class="bsum-label">Дохід</div>
+        <div class="bsum-amount" style="color:var(--green)" id="bsum-income">+7 600</div>
+      </div>
+      <div class="bsum-card">
+        <div class="bsum-label">Витрати</div>
+        <div class="bsum-amount" style="color:var(--red)" id="bsum-expense">-4 900</div>
+      </div>
+      <div class="bsum-card">
+        <div class="bsum-label">Вільно</div>
+        <div class="bsum-amount" style="color:var(--yellow)" id="bsum-free">2 700</div>
+      </div>
+    </div>
+
+    <div class="section-label">По категоріях</div>
+    <div class="card" id="budget-cats"></div>
+
+    <div class="section-label">Імпорт з PKO</div>
+    <div class="import-area" onclick="document.getElementById('csv-input').click()">
+      <div class="import-icon">📥</div>
+      <div class="import-text">Натисни щоб завантажити<br>виписку з PKO (.csv)</div>
+      <div class="import-hint">PKO → Історія → Експорт → CSV</div>
+    </div>
+    <input type="file" id="csv-input" accept=".csv" style="display:none" onchange="importCSV(this)">
+
+    <div style="height: 80px"></div>
+  </div>
+
+  <!-- REMINDERS -->
+  <div class="screen" id="screen-reminders">
+    <div class="page-title">Нагадування 🔔</div>
+    <div id="reminders-list"></div>
+    <div style="height: 80px"></div>
+  </div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <button class="nav-btn active" onclick="goTo('dashboard', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      ДАШБОРД
+    </button>
+    <button class="nav-btn" onclick="goTo('wishlist', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      WISHLIST
+    </button>
+    <button class="nav-btn" onclick="goTo('budget', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6v6l4 2"/></svg>
+      БЮДЖЕТ
+    </button>
+    <button class="nav-btn" onclick="goTo('reminders', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      ПЛАТЕЖІ
+    </button>
+  </nav>
+</div>
+
+<!-- FAB -->
+<button class="fab" onclick="openModal()">+</button>
+
+<!-- ADD TRANSACTION MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Нова транзакція</div>
+
+    <div class="form-group">
+      <div class="type-toggle">
+        <button class="type-btn active expense" id="btn-expense" onclick="setType('expense')">— Витрата</button>
+        <button class="type-btn income" id="btn-income" onclick="setType('income')">+ Дохід</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Сума (zł)</label>
+      <input class="form-input" type="number" id="tx-amount" placeholder="0.00" inputmode="decimal">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Назва</label>
+      <input class="form-input" type="text" id="tx-name" placeholder="Їжа, транспорт...">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Категорія</label>
+      <select class="form-input" id="tx-cat">
+        <option value="🏠 Квартира">🏠 Квартира</option>
+        <option value="🛒 Їжа">🛒 Їжа</option>
+        <option value="🚌 Транспорт">🚌 Транспорт</option>
+        <option value="📡 Зв'язок">📡 Зв'язок</option>
+        <option value="💳 Кредит">💳 Кредит</option>
+        <option value="🎬 Робота">🎬 Робота</option>
+        <option value="🎉 Розваги">🎉 Розваги</option>
+        <option value="🛍 Покупки">🛍 Покупки</option>
+        <option value="💊 Здоров'я">💊 Здоров'я</option>
+        <option value="✈️ Подорожі">✈️ Подорожі</option>
+        <option value="📦 Інше">📦 Інше</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Рахунок</label>
+      <select class="form-input" id="tx-account">
+        <option value="PKO">PKO</option>
+        <option value="Ощадний">Ощадний</option>
+        <option value="Cash">Cash</option>
+        <option value="Mono">Monobank</option>
+      </select>
+    </div>
+
+    <button class="btn-primary" onclick="saveTransaction()">ЗБЕРЕГТИ</button>
+    <div style="height:10px"></div>
+    <button onclick="closeModal()" style="width:100%;padding:12px;background:none;border:none;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:11px;cursor:pointer">Скасувати</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ STATE ============
+let state = JSON.parse(localStorage.getItem('financeApp') || 'null') || {
+  transactions: [
+    { id: 1, type: 'expense', name: 'Подарунки Ліза', amount: 339, cat: '🎉 Розваги', account: 'PKO', date: '2026-03-08' },
+    { id: 2, type: 'expense', name: 'Мамі квитки', amount: 200, cat: '🎉 Розваги', account: 'PKO', date: '2026-03-08' },
+    { id: 3, type: 'expense', name: 'Food', amount: 98, cat: '🛒 Їжа', account: 'PKO', date: '2026-03-07' },
+    { id: 4, type: 'expense', name: 'Продукти', amount: 35, cat: '🛒 Їжа', account: 'PKO', date: '2026-03-07' },
+    { id: 5, type: 'income', name: 'Зйомка Pokafona', amount: 1000, cat: '🎬 Робота', account: 'Cash', date: '2026-03-02' },
+  ],
+  accounts: { PKO: 347, Ощадний: 3395, Cash: 5600, Mono: -4696 },
+  reminders: [
+    { id: 1, name: 'Квартира', desc: 'Оренда + комуналка', amount: 2900, day: 15, month: 3, paid: false, color: 'red' },
+    { id: 2, name: 'Кредитка Mono', desc: 'Закрити борг', amount: 450, day: 15, month: 3, paid: false, color: 'red' },
+    { id: 3, name: 'Інтернет / зв\'язок', desc: 'Play + телефон', amount: 50, day: 10, month: 3, paid: false, color: 'yellow' },
+    { id: 4, name: 'Зарплата', desc: 'Основна', amount: 5500, day: 15, month: 3, paid: false, color: 'green' },
+    { id: 5, name: 'Зйомка Półmaraton', desc: 'Очікуваний дохід', amount: 900, day: 23, month: 3, paid: false, color: 'green' },
+    { id: 6, name: 'Suntugo аквапарк', desc: 'Бронь — оплата квітень', amount: 250, day: 1, month: 4, paid: false, color: 'yellow' },
+    { id: 7, name: 'Краків', desc: 'Білети + готель (квітень)', amount: 450, day: 5, month: 4, paid: false, color: 'yellow' },
+    { id: 8, name: 'IT Emil&Eugenia', desc: 'Зйомка', amount: 1200, day: 27, month: 3, paid: false, color: 'green' },
+  ],
+  wishlist: [
+    { id: 1, name: 'Gimbal RS4 Mini', emoji: '🎬', price: 1900, saved: 0, priority: 'high', done: false },
+    { id: 2, name: 'Comica VM40', emoji: '🎙', price: 1000, saved: 0, priority: 'high', done: false },
+    { id: 3, name: 'SmallRig RC 60C LED', emoji: '💡', price: 770, saved: 0, priority: 'high', done: false },
+    { id: 4, name: 'SmallRig V-Mount VB50', emoji: '🔋', price: 380, saved: 0, priority: 'med', done: false },
+    { id: 5, name: 'GVM RGB LED 2x', emoji: '🌈', price: 1050, saved: 0, priority: 'med', done: false },
+    { id: 6, name: 'iPhone 17 256GB Sage', emoji: '📱', price: 4000, saved: 0, priority: 'med', done: false },
+    { id: 7, name: 'Apple Watch SE 2gen', emoji: '⌚', price: 800, saved: 0, priority: 'low', done: false },
+    { id: 8, name: 'Toyota Yaris б/в', emoji: '🚗', price: 20000, saved: 0, priority: 'low', done: false },
+  ],
+  currentMonth: 3,
+  currentYear: 2026,
+};
+
+function save() { localStorage.setItem('financeApp', JSON.stringify(state)); }
+
+// ============ NAVIGATION ============
+let txType = 'expense';
+
+function goTo(screen, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + screen).classList.add('active');
+  btn.classList.add('active');
+  renderScreen(screen);
+}
+
+function renderScreen(screen) {
+  if (screen === 'dashboard') renderDashboard();
+  if (screen === 'wishlist') renderWishlist();
+  if (screen === 'budget') renderBudget();
+  if (screen === 'reminders') renderReminders();
+}
+
+// ============ DASHBOARD ============
+function renderDashboard() {
+  const total = Object.values(state.accounts).reduce((a, b) => a + (b > 0 ? b : 0), 0);
+  document.getElementById('total-balance').textContent = formatZl(total);
+  document.getElementById('acc-pko').textContent = formatNum(state.accounts.PKO);
+  document.getElementById('acc-save').textContent = formatNum(state.accounts.Ощадний);
+  document.getElementById('acc-cash').textContent = formatNum(state.accounts.Cash);
+  document.getElementById('acc-debt').textContent = formatNum(state.accounts.Mono);
+
+  const list = document.getElementById('transactions-list');
+  const recent = [...state.transactions].sort((a,b) => b.date.localeCompare(a.date)).slice(0, 8);
+  list.innerHTML = recent.map(tx => `
+    <div class="spending-row animate">
+      <div class="spending-cat">
+        <div class="spending-icon" style="background:${tx.type==='expense'?'var(--red-dim)':'var(--green-dim)'}">
+          ${tx.cat.split(' ')[0]}
+        </div>
+        <div>
+          <div class="spending-name">${tx.name}</div>
+          <div class="spending-desc">${tx.cat} · ${tx.account} · ${formatDate(tx.date)}</div>
+        </div>
+      </div>
+      <div class="spending-amount ${tx.type==='expense'?'neg':'pos'}">
+        ${tx.type==='expense'?'-':'+'}${formatNum(tx.amount)} zł
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============ WISHLIST ============
+function renderWishlist() {
+  const container = document.getElementById('wishlist-container');
+  const totalPrice = state.wishlist.filter(w=>!w.done).reduce((a,b)=>a+b.price,0);
+  
+  container.innerHTML = `
+    <div class="card" style="margin-bottom:16px">
+      <div style="font-size:9px;color:var(--text-dim);letter-spacing:2px;margin-bottom:6px">ВСЬОГО ДО ПОКУПКИ</div>
+      <div style="font-family:'Unbounded',sans-serif;font-size:24px;font-weight:900;color:var(--yellow)">${formatZl(totalPrice)}</div>
+    </div>
+    ${state.wishlist.map(w => `
+    <div class="wish-card ${w.done?'done':''}" onclick="toggleWish(${w.id})">
+      <div class="wish-header">
+        <div>
+          <div style="font-size:28px;margin-bottom:6px">${w.emoji}</div>
+          <div class="wish-name">${w.name}</div>
+          <div class="wish-price">${formatZl(w.price)}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="wish-priority ${w.priority}">${w.priority==='high'?'ТЕРМІНОВО':w.priority==='med'?'СКОРО':'ПОТІМ'}</div>
+          ${w.done ? '<div class="wish-status" style="margin-top:8px">✓ КУПЛЕНО</div>' : ''}
+        </div>
+      </div>
+      ${!w.done ? `
+        <div class="prog-wrap">
+          <div class="prog-bar" style="width:${Math.min(100,Math.round(w.saved/w.price*100))}%;background:${w.priority==='high'?'var(--green)':w.priority==='med'?'var(--yellow)':'var(--blue)'}"></div>
+        </div>
+        <div class="wish-pct">${Math.round(w.saved/w.price*100)}% накопичено · ${formatZl(w.price - w.saved)} залишилось</div>
+      ` : ''}
+    </div>
+  `).join('')}
+  `;
+}
+
+function toggleWish(id) {
+  const w = state.wishlist.find(x => x.id === id);
+  w.done = !w.done;
+  save();
+  renderWishlist();
+  showToast(w.done ? `✓ ${w.name} куплено!` : `${w.name} повернуто`);
+}
+
+// ============ BUDGET ============
+const months = ['','ЯНВАРЬ','ЛЮТИЙ','БЕРЕЗЕНЬ','КВІТЕНЬ','ТРАВЕНЬ','ЧЕРВЕНЬ','ЛИПЕНЬ','СЕРПЕНЬ','ВЕРЕСЕНЬ','ЖОВТЕНЬ','ЛИСТОПАД','ГРУДЕНЬ'];
+
+function changeMonth(dir) {
+  state.currentMonth += dir;
+  if (state.currentMonth > 12) { state.currentMonth = 1; state.currentYear++; }
+  if (state.currentMonth < 1) { state.currentMonth = 12; state.currentYear--; }
+  save();
+  renderBudget();
+}
+
+function renderBudget() {
+  document.getElementById('month-display').textContent = `${months[state.currentMonth]} ${state.currentYear}`;
+
+  const monthTx = state.transactions.filter(tx => {
+    const d = new Date(tx.date);
+    return d.getMonth()+1 === state.currentMonth && d.getFullYear() === state.currentYear;
+  });
+
+  const income = monthTx.filter(t=>t.type==='income').reduce((a,b)=>a+b.amount,0);
+  const expense = monthTx.filter(t=>t.type==='expense').reduce((a,b)=>a+b.amount,0);
+  document.getElementById('bsum-income').textContent = '+' + formatNum(income);
+  document.getElementById('bsum-expense').textContent = '-' + formatNum(expense);
+  document.getElementById('bsum-free').textContent = formatNum(income - expense);
+
+  const cats = {};
+  monthTx.filter(t=>t.type==='expense').forEach(t => {
+    if (!cats[t.cat]) cats[t.cat] = 0;
+    cats[t.cat] += t.amount;
+  });
+
+  const maxCat = Math.max(...Object.values(cats), 1);
+  const catsHTML = Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([cat, amt]) => `
+    <div class="cat-item">
+      <div class="cat-icon">${cat.split(' ')[0]}</div>
+      <div class="cat-info">
+        <div class="cat-name">${cat}</div>
+        <div class="prog-wrap">
+          <div class="prog-bar" style="width:${Math.round(amt/maxCat*100)}%;background:var(--red)"></div>
+        </div>
+      </div>
+      <div class="cat-spent" style="color:var(--red)">-${formatNum(amt)}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('budget-cats').innerHTML = catsHTML || '<div style="color:var(--text-dim);font-size:11px;text-align:center;padding:20px">Немає транзакцій за цей місяць</div>';
+}
+
+// ============ REMINDERS ============
+function renderReminders() {
+  const list = document.getElementById('reminders-list');
+  const now = new Date();
+  
+  const sorted = [...state.reminders].sort((a,b) => {
+    const da = new Date(2026, a.month-1, a.day);
+    const db = new Date(2026, b.month-1, b.day);
+    return da - db;
+  });
+
+  list.innerHTML = sorted.map(r => {
+    const rDate = new Date(2026, r.month-1, r.day);
+    const diff = Math.ceil((rDate - now) / (1000*60*60*24));
+    let urgency = diff <= 3 ? 'urgent' : diff <= 7 ? 'soon' : 'ok';
+    if (r.paid) urgency = 'paid';
+    
+    return `
+    <div class="reminder-card ${urgency}">
+      <div class="rem-date">
+        <div class="rem-day" style="color:${r.color==='red'?'var(--red)':r.color==='green'?'var(--green)':'var(--yellow)'}">${r.day}</div>
+        <div class="rem-month">${months[r.month].slice(0,3)}</div>
+      </div>
+      <div class="rem-info">
+        <div class="rem-name">${r.name}</div>
+        <div class="rem-desc">${r.desc} ${!r.paid && diff > 0 ? `· за ${diff} дн.` : r.paid ? '· сплачено' : '· прострочено'}</div>
+      </div>
+      <div>
+        <div class="rem-amount ${r.color}">${r.color==='green'?'+':'-'}${formatNum(r.amount)} zł</div>
+      </div>
+      <button class="rem-check ${r.paid?'checked':''}" onclick="toggleReminder(${r.id}, event)">
+        ${r.paid ? '✓' : ''}
+      </button>
+    </div>
+  `}).join('');
+}
+
+function toggleReminder(id, e) {
+  e.stopPropagation();
+  const r = state.reminders.find(x => x.id === id);
+  r.paid = !r.paid;
+  save();
+  renderReminders();
+  showToast(r.paid ? `✓ ${r.name} відмічено` : `${r.name} повернуто`);
+}
+
+// ============ MODAL ============
+function openModal() { document.getElementById('modal').classList.add('open'); }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+function setType(type) {
+  txType = type;
+  document.getElementById('btn-expense').classList.toggle('active', type==='expense');
+  document.getElementById('btn-income').classList.toggle('active', type==='income');
+  document.getElementById('btn-expense').classList.toggle('expense', type==='expense');
+  document.getElementById('btn-income').classList.toggle('income', type==='income');
+}
+
+function saveTransaction() {
+  const amount = parseFloat(document.getElementById('tx-amount').value);
+  const name = document.getElementById('tx-name').value.trim();
+  if (!amount || !name) { showToast('❌ Заповни всі поля'); return; }
+
+  const tx = {
+    id: Date.now(),
+    type: txType,
+    name,
+    amount,
+    cat: document.getElementById('tx-cat').value,
+    account: document.getElementById('tx-account').value,
+    date: new Date().toISOString().split('T')[0]
+  };
+
+  state.transactions.unshift(tx);
+  const acc = tx.account;
+  if (state.accounts[acc] !== undefined) {
+    state.accounts[acc] += tx.type === 'income' ? amount : -amount;
+  }
+  save();
+  closeModal();
+  renderDashboard();
+  showToast(tx.type === 'income' ? `✓ +${formatNum(amount)} zł додано` : `✓ -${formatNum(amount)} zł записано`);
+
+  document.getElementById('tx-amount').value = '';
+  document.getElementById('tx-name').value = '';
+}
+
+// ============ CSV IMPORT ============
+function importCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.split('\n').slice(1);
+    let count = 0;
+    lines.forEach(line => {
+      const cols = line.split(';');
+      if (cols.length < 5) return;
+      const date = cols[0]?.replace(/"/g,'').trim();
+      const desc = cols[2]?.replace(/"/g,'').trim();
+      const amtStr = cols[4]?.replace(/"/g,'').replace(',','.').trim();
+      const amt = parseFloat(amtStr);
+      if (!date || !desc || isNaN(amt)) return;
+
+      state.transactions.push({
+        id: Date.now() + count,
+        type: amt < 0 ? 'expense' : 'income',
+        name: desc.slice(0, 40),
+        amount: Math.abs(amt),
+        cat: '📦 Інше',
+        account: 'PKO',
+        date: date.split('.').reverse().join('-')
+      });
+      count++;
+    });
+    save();
+    renderBudget();
+    showToast(`✓ Імпортовано ${count} транзакцій`);
+    input.value = '';
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+// ============ UTILS ============
+function formatNum(n) { return Math.abs(n).toLocaleString('uk-UA'); }
+function formatZl(n) { return formatNum(n) + ' zł'; }
+function formatDate(d) {
+  const [y,m,day] = d.split('-');
+  return `${day}.${m}`;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// close modal on overlay click
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// init
+renderDashboard();
+renderReminders();
+</script>
+</body>
+</html>
